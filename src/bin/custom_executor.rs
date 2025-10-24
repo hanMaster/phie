@@ -5,33 +5,33 @@ extern crate phie;
 
 use phie::data::Data;
 use phie::emu::{Emu, Opt};
+use phie::error::Result;
 use std::env;
 use std::fs;
 use std::str::FromStr;
 
-fn emulate(phi_code: &str) -> Data {
-    let mut emu: Emu = Emu::from_str(phi_code).unwrap();
+fn emulate(phi_code: &str) -> Result<Data> {
+    let mut emu = Emu::from_str(phi_code)?;
     emu.opt(Opt::LogSnapshots);
     emu.opt(Opt::StopWhenTooManyCycles);
     emu.opt(Opt::StopWhenStuck);
-    emu.dataize().0
+    Ok(emu.dataize().0)
 }
 
-pub fn run_emulator(filename: &str) -> i16 {
-    let binding = fs::read_to_string(filename).unwrap();
-    let phi_code: &str = binding.as_str();
-    emulate(phi_code)
+pub fn run_emulator(filename: &str) -> Result<i16> {
+    let phi_code = fs::read_to_string(filename)?;
+    emulate(&phi_code)
 }
 
-pub fn execute_program(args: &[String]) -> i16 {
+pub fn execute_program(args: &[String]) -> Result<i16> {
     assert!(args.len() >= 2);
     let filename: &str = &args[1];
-    let result: i16 = run_emulator(filename);
+    let result: i16 = run_emulator(filename)?;
     if args.len() >= 3 {
-        let correct = args[2].parse::<i16>().unwrap();
+        let correct = args[2].parse::<i16>()?;
         assert_eq!(result, correct);
     }
-    result
+    Ok(result)
 }
 
 pub fn main() {
@@ -39,13 +39,10 @@ pub fn main() {
     let args: Vec<String> = env::args().collect();
     assert!(args.len() >= 2);
     let result = execute_program(&args);
-    println!("Executor result: {}", result);
-}
-
-#[test]
-#[should_panic]
-fn test_main() {
-    main();
+    match result {
+        Ok(value) => println!("Executor result: {value}"),
+        Err(error) => eprintln!("Executor error: {error}"),
+    }
 }
 
 #[test]
@@ -56,27 +53,34 @@ fn test_execute_program_with_valid_args() {
         "84".to_string(),
     ];
     let result = execute_program(&args);
-    assert_eq!(result, 84);
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap(), 84);
 }
 
 #[test]
 #[should_panic]
 fn test_execute_program_with_invalid_args() {
     let args = vec!["program_name".to_string()];
-    execute_program(&args);
+    execute_program(&args).unwrap();
 }
 
 #[test]
 fn executes_file_example() {
-    assert_eq!(84, run_emulator("tests/resources/written_test_example"));
+    let result = run_emulator("tests/resources/written_test_example");
+    assert!(result.is_ok());
+    assert_eq!(84, result.unwrap());
 }
 
 #[test]
 fn executes_fibonacci_file() {
-    assert_eq!(21, run_emulator("tests/resources/written_fibonacci_test"));
+    let result = run_emulator("tests/resources/written_fibonacci_test");
+    assert!(result.is_ok());
+    assert_eq!(21, result.unwrap());
 }
 
 #[test]
 fn executes_sum_file() {
-    assert_eq!(84, run_emulator("tests/resources/written_sum_test"));
+    let result = run_emulator("tests/resources/written_sum_test");
+    assert!(result.is_ok());
+    assert_eq!(84, result.unwrap());
 }

@@ -63,14 +63,15 @@ impl fmt::Display for Emu {
 }
 
 impl FromStr for Emu {
-    type Err = String;
+    type Err = crate::error::Error;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut emu = Emu::empty();
-        let re_line = Regex::new("ν(\\d+)\\(𝜋\\) ↦ (⟦.*⟧)").unwrap();
+        let re_line = Regex::new("ν(\\d+)\\(𝜋\\) ↦ (⟦.*⟧)")?;
         for line in s.trim().split('\n').map(|t| t.trim()) {
             let caps = re_line.captures(line).unwrap();
-            let v: Ob = caps.get(1).unwrap().as_str().parse().unwrap();
-            emu.put(v, Object::from_str(caps.get(2).unwrap().as_str()).unwrap());
+            let v: Ob = caps.get(1).unwrap().as_str().parse()?;
+            emu.put(v, Object::from_str(caps.get(2).unwrap().as_str())?);
         }
         Ok(emu)
     }
@@ -96,7 +97,7 @@ impl Emu {
     /// additional objects.
     pub fn empty() -> Emu {
         let mut emu = Emu {
-            objects: arr![Object::open(); 16],
+            objects: arr![Object::new(); 16],
             baskets: arr![Basket::empty(); 128],
             opts: HashSet::new(),
         };

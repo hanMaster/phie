@@ -22,7 +22,7 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn open() -> Object {
+    pub fn new() -> Object {
         Object {
             delta: None,
             lambda: None,
@@ -68,7 +68,7 @@ impl Object {
     /// use phie::object::Object;
     /// use std::str::FromStr;
     /// use phie::ph;
-    /// let mut obj = Object::open();
+    /// let mut obj = Object::new();
     /// obj.push(Loc::Phi, ph!("ν13"), false);
     /// obj.push(Loc::Attr(0), ph!("ρ.1"), false);
     /// ```
@@ -86,7 +86,7 @@ impl Object {
     /// use phie::object::Object;
     /// use std::str::FromStr;
     /// use phie::ph;
-    /// let obj = Object::open()
+    /// let obj = Object::new()
     ///   .with(Loc::Phi, ph!("ν13"), false)
     ///   .with(Loc::Attr(0), ph!("ρ.1"), false);
     /// ```
@@ -103,7 +103,7 @@ impl Object {
     }
 
     fn copy(&self) -> Object {
-        let mut obj = Object::open();
+        let mut obj = Object::new();
         obj.lambda = self.lambda.clone();
         obj.constant = self.constant;
         obj.delta = self.delta;
@@ -145,10 +145,10 @@ impl fmt::Display for Object {
 }
 
 impl FromStr for Object {
-    type Err = String;
+    type Err = crate::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let re = Regex::new("⟦(!?)(.*)⟧").unwrap();
-        let mut obj = Object::open();
+        let re = Regex::new("⟦(!?)(.*)⟧")?;
+        let mut obj = Object::new();
         let caps = re.captures(s).unwrap();
         for pair in caps
             .get(2)
@@ -198,11 +198,11 @@ impl FromStr for Object {
                             .take(tail.len() - xi_suffix.len() - 1)
                             .collect()
                     } else {
-                        tail.to_string()
+                        tail
                     };
                     obj.push(
-                        Loc::from_str(i).unwrap(),
-                        Locator::from_str(&locator).unwrap(),
+                        Loc::from_str(i)?,
+                        Locator::from_str(&locator)?,
                         xi,
                     );
                 }
@@ -220,7 +220,7 @@ use crate::ph;
 
 #[test]
 fn makes_simple_object() {
-    let mut obj = Object::open();
+    let mut obj = Object::new();
     obj.push(Loc::Attr(1), "ν4".parse().unwrap(), false);
     obj.push(Loc::Rho, "P.0.@".parse().unwrap(), false);
     assert_eq!(obj.attrs.len(), 2)
@@ -228,7 +228,7 @@ fn makes_simple_object() {
 
 #[test]
 fn extends_by_making_new_object() {
-    let obj = Object::open()
+    let obj = Object::new()
         .with(Loc::Attr(1), ph!("ν14"), false)
         .with(Loc::Phi, ph!("^.@"), false)
         .with(Loc::Rho, ph!("P.^.0.0.^.@"), false);
@@ -239,7 +239,7 @@ fn extends_by_making_new_object() {
 
 #[test]
 fn prints_and_parses_simple_object() {
-    let mut obj = Object::open();
+    let mut obj = Object::new();
     obj.constant = true;
     obj.push(Loc::Attr(1), "ν4".parse().unwrap(), false);
     obj.push(Loc::Rho, "P.0.@".parse().unwrap(), false);

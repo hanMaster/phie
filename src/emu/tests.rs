@@ -31,7 +31,7 @@ use std::str::FromStr;
 #[test]
 pub fn simple_dataization_cycle() {
     let mut emu = Emu::empty();
-    emu.put(0, Object::open().with(Loc::Phi, ph!("ν1"), true));
+    emu.put(0, Object::new().with(Loc::Phi, ph!("ν1"), true));
     emu.put(1, Object::dataic(42));
     assert_eq!(42, emu.dataize().0);
 }
@@ -39,20 +39,20 @@ pub fn simple_dataization_cycle() {
 #[test]
 pub fn with_simple_decorator() {
     let mut emu = Emu::empty();
-    emu.put(0, Object::open().with(Loc::Phi, ph!("ν2"), true));
+    emu.put(0, Object::new().with(Loc::Phi, ph!("ν2"), true));
     emu.put(1, Object::dataic(42));
-    emu.put(2, Object::open().with(Loc::Phi, ph!("ν1"), false));
+    emu.put(2, Object::new().with(Loc::Phi, ph!("ν1"), false));
     assert_eq!(42, emu.dataize().0);
 }
 
 #[test]
 pub fn with_many_decorators() {
     let mut emu = Emu::empty();
-    emu.put(0, Object::open().with(Loc::Phi, ph!("ν4"), true));
+    emu.put(0, Object::new().with(Loc::Phi, ph!("ν4"), true));
     emu.put(1, Object::dataic(42));
-    emu.put(2, Object::open().with(Loc::Phi, ph!("ν1"), false));
-    emu.put(3, Object::open().with(Loc::Phi, ph!("ν2"), false));
-    emu.put(4, Object::open().with(Loc::Phi, ph!("ν3"), false));
+    emu.put(2, Object::new().with(Loc::Phi, ph!("ν1"), false));
+    emu.put(3, Object::new().with(Loc::Phi, ph!("ν2"), false));
+    emu.put(4, Object::new().with(Loc::Phi, ph!("ν3"), false));
     assert_eq!(42, emu.dataize().0);
 }
 

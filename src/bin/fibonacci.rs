@@ -5,9 +5,10 @@ extern crate phie;
 
 use phie::data::Data;
 use phie::emu::{Emu, Opt};
+use phie::error::Result;
 use std::env;
 
-pub fn fibo(x: Data) -> Data {
+pub fn fibo(x: Data) -> Result<Data> {
     let mut emu: Emu = format!(
         "
         ν0(𝜋) ↦ ⟦ 𝜑 ↦ ν2(𝜋) ⟧
@@ -26,27 +27,27 @@ pub fn fibo(x: Data) -> Data {
         ",
         x
     )
-    .parse()
-    .unwrap();
+    .parse()?;
     emu.opt(Opt::LogSnapshots);
     emu.opt(Opt::StopWhenTooManyCycles);
     emu.opt(Opt::StopWhenStuck);
-    emu.dataize().0
+    Ok(emu.dataize().0)
 }
 
-pub fn main() {
+pub fn main() -> Result<()> {
     env_logger::init();
     let args: Vec<String> = env::args().collect();
-    let input = args[1].parse().unwrap();
-    let cycles = args[2].parse().unwrap();
+    let input = args[1].parse()?;
+    let cycles = args[2].parse()?;
     let mut total = 0;
     let mut f = 0;
     for _ in 0..cycles {
-        f = fibo(input);
+        f = fibo(input)?;
         total += f;
     }
     println!("{}-th Fibonacci number is {}", input, f);
     println!("Sum of results is {}", total);
+    Ok(())
 }
 
 #[cfg(test)]
@@ -55,5 +56,5 @@ use simple_logger::SimpleLogger;
 #[test]
 fn calculates_fibonacci() {
     SimpleLogger::new().init().unwrap();
-    assert_eq!(21, fibo(7))
+    assert_eq!(21, fibo(7).unwrap())
 }

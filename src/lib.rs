@@ -11,6 +11,7 @@ pub mod loc;
 pub mod locator;
 pub mod object;
 pub mod perf;
+pub mod error;
 
 #[cfg(test)]
 use simple_logger::SimpleLogger;
