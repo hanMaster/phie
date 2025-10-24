@@ -11,6 +11,7 @@ pub enum Error {
     ParseIntFailed(std::num::ParseIntError),
     EmuFromStrFailed(String),
     Regex(regex::Error),
+    ObjectFromStrFailed(String),
 }
 
 // region:    --- Error boilerplate

@@ -149,7 +149,12 @@ impl FromStr for Object {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let re = Regex::new("⟦(!?)(.*)⟧")?;
         let mut obj = Object::new();
-        let caps = re.captures(s).unwrap();
+        let caps = re
+            .captures(s)
+            .ok_or(crate::error::Error::ObjectFromStrFailed(
+                "Empty captures".to_string(),
+            ))?;
+
         for pair in caps
             .get(2)
             .unwrap()
@@ -200,11 +205,7 @@ impl FromStr for Object {
                     } else {
                         tail
                     };
-                    obj.push(
-                        Loc::from_str(i)?,
-                        Locator::from_str(&locator)?,
-                        xi,
-                    );
+                    obj.push(Loc::from_str(i)?, Locator::from_str(&locator)?, xi);
                 }
             };
         }
