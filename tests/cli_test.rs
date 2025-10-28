@@ -7,7 +7,7 @@ use phie::cli;
 
 #[test]
 fn runs_simple_program_from_file() {
-    let temp_file = "/tmp/phie_test_simple.phie";
+    let temp_file = "tests/resources/tmp/phie_test_simple.phie";
     fs::write(temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧").unwrap();
     let args = vec!["phie".to_string(), temp_file.to_string()];
     let result = cli::run(&args);
@@ -18,7 +18,7 @@ fn runs_simple_program_from_file() {
 
 #[test]
 fn runs_addition_program() {
-    let temp_file = "/tmp/phie_test_addition.phie";
+    let temp_file = "tests/resources/tmp/phie_test_addition.phie";
     let program = "
         ν0(𝜋) ↦ ⟦ 𝜑 ↦ ν3(𝜋) ⟧
         ν1(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧
@@ -35,7 +35,7 @@ fn runs_addition_program() {
 
 #[test]
 fn fails_with_nonexistent_file() {
-    let args = vec!["phie".to_string(), "/tmp/nonexistent_xyz.phie".to_string()];
+    let args = vec!["phie".to_string(), "tests/resources/tmp/nonexistent_xyz.phie".to_string()];
     let result = cli::run(&args);
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("does not exist"));
@@ -51,7 +51,7 @@ fn fails_with_no_arguments() {
 
 #[test]
 fn fails_with_invalid_program() {
-    let temp_file = "/tmp/phie_test_invalid.phie";
+    let temp_file = "tests/resources/tmp/phie_test_invalid.phie";
     fs::write(temp_file, "invalid syntax").unwrap();
     let args = vec!["phie".to_string(), temp_file.to_string()];
     let result = cli::run(&args);
@@ -62,7 +62,7 @@ fn fails_with_invalid_program() {
 
 #[test]
 fn reads_multiline_program() {
-    let temp_file = "/tmp/phie_test_multiline.phie";
+    let temp_file = "tests/resources/tmp/phie_test_multiline.phie";
     let program = "ν0(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧\nν1(𝜋) ↦ ⟦ Δ ↦ 0x0001 ⟧";
     fs::write(temp_file, program).unwrap();
     let result = cli::read_phie_file(temp_file);
@@ -75,7 +75,7 @@ fn reads_multiline_program() {
 
 #[test]
 fn handles_whitespace_in_file() {
-    let temp_file = "/tmp/phie_test_whitespace.phie";
+    let temp_file = "tests/resources/tmp/phie_test_whitespace.phie";
     let content = "  \n  ν0(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧  \n  ";
     fs::write(temp_file, content).unwrap();
     let args = vec!["phie".to_string(), temp_file.to_string()];
@@ -87,7 +87,7 @@ fn handles_whitespace_in_file() {
 
 #[test]
 fn executes_large_hex_value() {
-    let temp_file = "/tmp/phie_test_hex.phie";
+    let temp_file = "tests/resources/tmp/phie_test_hex.phie";
     fs::write(temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x00FF ⟧").unwrap();
     let args = vec!["phie".to_string(), temp_file.to_string()];
     let result = cli::run(&args);
@@ -98,7 +98,7 @@ fn executes_large_hex_value() {
 
 #[test]
 fn executes_zero_value() {
-    let temp_file = "/tmp/phie_test_zero.phie";
+    let temp_file = "tests/resources/tmp/phie_test_zero.phie";
     fs::write(temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0000 ⟧").unwrap();
     let args = vec!["phie".to_string(), temp_file.to_string()];
     let result = cli::run(&args);
@@ -109,7 +109,7 @@ fn executes_zero_value() {
 
 #[test]
 fn executes_one_value() {
-    let temp_file = "/tmp/phie_test_one.phie";
+    let temp_file = "tests/resources/tmp/phie_test_one.phie";
     fs::write(temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0001 ⟧").unwrap();
     let args = vec!["phie".to_string(), temp_file.to_string()];
     let result = cli::run(&args);
@@ -120,7 +120,7 @@ fn executes_one_value() {
 
 #[test]
 fn executes_hundred_value() {
-    let temp_file = "/tmp/phie_test_hundred.phie";
+    let temp_file = "tests/resources/tmp/phie_test_hundred.phie";
     fs::write(temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0064 ⟧").unwrap();
     let args = vec!["phie".to_string(), temp_file.to_string()];
     let result = cli::run(&args);
@@ -131,7 +131,7 @@ fn executes_hundred_value() {
 
 #[test]
 fn handles_phi_reference() {
-    let temp_file = "/tmp/phie_test_phi_ref.phie";
+    let temp_file = "tests/resources/tmp/phie_test_phi_ref.phie";
     let program = "
         ν0(𝜋) ↦ ⟦ 𝜑 ↦ ν1(𝜋) ⟧
         ν1(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧
@@ -148,7 +148,7 @@ fn handles_phi_reference() {
 #[test]
 fn fails_with_unreadable_file() {
     use std::{fs::Permissions, os::unix::fs::PermissionsExt};
-    let temp_file = "/tmp/phie_test_unreadable.phie";
+    let temp_file = "tests/resources/tmp/phie_test_unreadable.phie";
     fs::write(temp_file, "content").unwrap();
     fs::set_permissions(temp_file, Permissions::from_mode(0o000)).unwrap();
     let result = cli::read_phie_file(temp_file);
