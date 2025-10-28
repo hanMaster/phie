@@ -156,9 +156,9 @@ fn fails_with_unreadable_file() {
     use std::{fs::Permissions, os::unix::fs::PermissionsExt};
     let (temp_file, temp_file_str) = tmp_file_setup("phie_test_unreadable.phie");
     fs::write(&temp_file, "content").unwrap();
-    fs::set_permissions(temp_file, Permissions::from_mode(0o000)).unwrap();
+    fs::set_permissions(&temp_file, Permissions::from_mode(0o000)).unwrap();
     let result = cli::read_phie_file(&temp_file_str);
-    fs::set_permissions(temp_file, Permissions::from_mode(0o644)).unwrap();
+    fs::set_permissions(&temp_file, Permissions::from_mode(0o644)).unwrap();
     fs::remove_file(temp_file).unwrap();
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("Failed to read file"));
