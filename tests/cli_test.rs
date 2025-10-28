@@ -35,7 +35,10 @@ fn runs_addition_program() {
 
 #[test]
 fn fails_with_nonexistent_file() {
-    let args = vec!["phie".to_string(), "tests/resources/tmp/nonexistent_xyz.phie".to_string()];
+    let args = vec![
+        "phie".to_string(),
+        "tests/resources/tmp/nonexistent_xyz.phie".to_string(),
+    ];
     let result = cli::run(&args);
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("does not exist"));
