@@ -6,44 +6,44 @@ use std::fs;
 use std::path::PathBuf;
 
 fn mktemp(filename: &str) -> (PathBuf, String) {
-    let mut temp_file = std::env::temp_dir();
-    temp_file.push(filename);
-    let temp_file_str = temp_file.clone().into_os_string().into_string().unwrap();
-    (temp_file, temp_file_str)
+    let mut file = std::env::temp_dir();
+    file.push(filename);
+    let path = file.clone().into_os_string().into_string().unwrap();
+    (file, path)
 }
 
 #[test]
 fn runs_simple_program_from_file() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_simple.phie");
-    fs::write(&temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧").unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    let (file, path) = mktemp("phie_test_simple.phie");
+    fs::write(&file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧").unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "42");
 }
 
 #[test]
 fn runs_addition_program() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_addition.phie");
+    let (file, path) = mktemp("phie_test_addition.phie");
     let program = "
         ν0(𝜋) ↦ ⟦ 𝜑 ↦ ν3(𝜋) ⟧
         ν1(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧
         ν2(𝜋) ↦ ⟦ λ ↦ int-add, ρ ↦ 𝜋.𝛼0, 𝛼0 ↦ 𝜋.𝛼1 ⟧
         ν3(𝜋) ↦ ⟦ 𝜑 ↦ ν2(ξ), 𝛼0 ↦ ν1(𝜋), 𝛼1 ↦ ν1(𝜋) ⟧
     ";
-    fs::write(&temp_file, program).unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    fs::write(&file, program).unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "84");
 }
 
 #[test]
 fn fails_with_nonexistent_file() {
-    let (_, temp_file_str) = mktemp("nonexistent_xyz.phie");
-    let args = vec!["phie".to_string(), temp_file_str];
+    let (_, path) = mktemp("nonexistent_xyz.phie");
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("does not exist"));
@@ -59,22 +59,22 @@ fn fails_with_no_arguments() {
 
 #[test]
 fn fails_with_invalid_program() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_invalid.phie");
-    fs::write(&temp_file, "invalid syntax").unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    let (file, path) = mktemp("phie_test_invalid.phie");
+    fs::write(&file, "invalid syntax").unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("Failed to parse"));
 }
 
 #[test]
 fn reads_multiline_program() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_multiline.phie");
+    let (file, path) = mktemp("phie_test_multiline.phie");
     let program = "ν0(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧\nν1(𝜋) ↦ ⟦ Δ ↦ 0x0001 ⟧";
-    fs::write(&temp_file, program).unwrap();
-    let result = cli::read_phie_file(&temp_file_str);
-    fs::remove_file(temp_file).unwrap();
+    fs::write(&file, program).unwrap();
+    let result = cli::read_phie_file(&path);
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     let content = result.unwrap();
     assert!(content.contains("ν0"));
@@ -83,71 +83,71 @@ fn reads_multiline_program() {
 
 #[test]
 fn handles_whitespace_in_file() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_whitespace.phie");
+    let (file, path) = mktemp("phie_test_whitespace.phie");
     let content = "  \n  ν0(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧  \n  ";
-    fs::write(&temp_file, content).unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    fs::write(&file, content).unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "42");
 }
 
 #[test]
 fn executes_large_hex_value() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_hex.phie");
-    fs::write(&temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x00FF ⟧").unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    let (file, path) = mktemp("phie_test_hex.phie");
+    fs::write(&file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x00FF ⟧").unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "255");
 }
 
 #[test]
 fn executes_zero_value() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_zero.phie");
-    fs::write(&temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0000 ⟧").unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    let (file, path) = mktemp("phie_test_zero.phie");
+    fs::write(&file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0000 ⟧").unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "0");
 }
 
 #[test]
 fn executes_one_value() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_one.phie");
-    fs::write(&temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0001 ⟧").unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    let (file, path) = mktemp("phie_test_one.phie");
+    fs::write(&file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0001 ⟧").unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "1");
 }
 
 #[test]
 fn executes_hundred_value() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_hundred.phie");
-    fs::write(&temp_file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0064 ⟧").unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    let (file, path) = mktemp("phie_test_hundred.phie");
+    fs::write(&file, "ν0(𝜋) ↦ ⟦ Δ ↦ 0x0064 ⟧").unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "100");
 }
 
 #[test]
 fn handles_phi_reference() {
-    let (temp_file, temp_file_str) = mktemp("phie_test_phi_ref.phie");
+    let (file, path) = mktemp("phie_test_phi_ref.phie");
     let program = "
         ν0(𝜋) ↦ ⟦ 𝜑 ↦ ν1(𝜋) ⟧
         ν1(𝜋) ↦ ⟦ Δ ↦ 0x002A ⟧
     ";
-    fs::write(&temp_file, program).unwrap();
-    let args = vec!["phie".to_string(), temp_file_str];
+    fs::write(&file, program).unwrap();
+    let args = vec!["phie".to_string(), path];
     let result = cli::run(&args);
-    fs::remove_file(temp_file).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "42");
 }
@@ -156,12 +156,12 @@ fn handles_phi_reference() {
 #[test]
 fn fails_with_unreadable_file() {
     use std::{fs::Permissions, os::unix::fs::PermissionsExt};
-    let (temp_file, temp_file_str) = mktemp("phie_test_unreadable.phie");
-    fs::write(&temp_file, "content").unwrap();
-    fs::set_permissions(&temp_file, Permissions::from_mode(0o000)).unwrap();
-    let result = cli::read_phie_file(&temp_file_str);
-    fs::set_permissions(&temp_file, Permissions::from_mode(0o644)).unwrap();
-    fs::remove_file(temp_file).unwrap();
+    let (file, path) = mktemp("phie_test_unreadable.phie");
+    fs::write(&file, "content").unwrap();
+    fs::set_permissions(&file, Permissions::from_mode(0o000)).unwrap();
+    let result = cli::read_phie_file(&path);
+    fs::set_permissions(&file, Permissions::from_mode(0o644)).unwrap();
+    fs::remove_file(file).unwrap();
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("Failed to read file"));
 }
